@@ -1,0 +1,389 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@{
+    ViewBag.Title = "cart";
+    Layout = "~/Views/Shared/_genral_pages.cshtml";
+}
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $(".addtocart").click(function () {
+
+            var product_id = $(this).attr("data-id");
+            var quantity = $("#quantity_" + product_id).val()
+            if (quantity == 0)
+                // $(this).parent().parent().parent().parent().parent().parent().hide();
+                $("#tr_" + product_id).hide();
+            $.ajax({
+                url: '/home/AddToCart',
+                type: 'POST',
+                data: { "product_id": product_id, "quantity": quantity },
+                dataType: 'json',
+                success: function (res) {
+                    if (res == false)
+                        window.location.href = "/home/login";
+                    //update the cart item
+                    var l = '<i class="fa-solid fa-cart-shopping h3 text-danger me-2"></i>';
+                    //update cart amount and items
+                    $("#cart_count").html(l + res)
+                    //update total amount of each product
+                    $("#total_" + product_id).text(parseInt($("#salerate_" + product_id).text()) * quantity);
+                    //add total value of cart bill
+                    var total = 0;
+                    $(".total_of_items").each(function () {
+                        total += parseInt($(this).text())
+                    })
+                    $("#total_of_product").text(total)
+                    $("#total_of_bill").text(total + 50)
+                },
+                error: function () {
+                    alert('error occured');
+                }
+            })
+        })
+    })
+    function updatemodal() {
+        var modal_data = $("#modalform").serializeArray();
+
+        $.ajax({
+            url: '/home/updatemodal',
+            type: 'post',
+            data: modal_data,
+            dataType: 'json',
+            success: function (res) {
+                alert(res)
+
+                window.location.href = '/home/cart'
+            }
+
+
+        })
+
+    }
+</script>
+
+<section class="checkout-section-2 section-b-space">
+    <div class="container-fluid-lg">
+        <div class="row g-sm-4 g-3">
+            <div class="col-lg-8 mx-auto  ">
+                <div class="left-sidebar-checkout">
+                    <div class="checkout-detail-box">
+                        <ul>
+                            <li>
+
+                                @if (ViewBag.user != null)
+                                {
+
+                                    foreach (var i in ViewBag.user.Rows)
+                                    {
+                                        <div class="checkout-box">
+                                            <div class="checkout-title">
+                                                <h4>Delivery Address</h4>
+                                            </div>
+
+                                            <div class="checkout-detail">
+                                                <div class="row g-4">
+                                                    <div class="col-xxl-12 col-lg-12 col-md-6">
+                                                        <div class="delivery-address-box">
+                                                            <div>
+
+
+                                                                <div class="label">
+                                                                    <a>
+                                                                        <button type="button" class="btn" style="height:10px; width:20px; line-height:4px;" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                                            Edit
+                                                                        </button>
+                                                                    </a>
+                                                                </div>
+
+
+
+
+                                                                <ul class="delivery-address-detail">
+                                                                    <li>
+                                                                        <h4 class="fw-500">@i["name"]</h4>
+                                                                    </li>
+
+                                                                    <li>
+                                                                        <p class="text-content">
+                                                                            <span class="text-title">
+                                                                                Address
+                                                                                :
+                                                                            </span>@i["address"]
+                                                                        </p>
+                                                                    </li>
+
+                                                                    <li>
+                                                                        <h6 class="text-content">
+                                                                            <span class="text-title">
+                                                                                Landmark
+                                                                                :
+                                                                            </span>@i["landmark"]
+                                                                        </h6>
+                                                                    </li>
+
+                                                                    <li>
+                                                                        <h6 class="text-content">
+                                                                            <span class="text-title">
+                                                                                PinCode
+                                                                                :
+                                                                            </span>@i["pincode"]
+                                                                        </h6>
+                                                                    </li>
+
+                                                                    <li>
+                                                                        <h6 class="text-content">
+                                                                            <span class="text-title">
+                                                                                Mobile
+                                                                                :
+                                                                            </span>@i["mobno"]
+                                                                        </h6>
+                                                                    </li>
+
+
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </li>
+
+
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</section>
+<div class="check-box">
+    <h2 class="text-center checkout-title">Cart Item's</h2><hr />
+</div>
+
+<section class="cart-section section-b-space">
+    <div class="container">
+        <div class="row g-sm-5 g-3">
+            <div class="col-xxl-9">
+                <div class="cart-table">
+                    <div class="table-responsive-xl">
+                        <table class="table">
+                            <tbody>
+                                @{ int sum = 0;}
+                                @if (ViewBag.cart != null)
+                                {
+
+                                    foreach (var i in ViewBag.cart.Rows)
+                                    {
+
+                                        <tr class="product-box-contain" id="tr_@i["product_id"]">
+                                            <td class="product-detail">
+                                                <div class="product border-0">
+                                                    <a href="product-left-thumbnail.html" class="product-image">
+                                                        <img src="~/content/categoryicon/@i["product_icon"]"
+                                                             class="img-fluid blur-up lazyload" alt="">
+                                                    </a>
+                                                    <div class="product-detail" style="max-width:200px">
+                                                        <ul>
+                                                            <li class="name">
+                                                                <a href="product-left-thumbnail.html">@i["product_name"]</a>
+                                                            </li>
+
+                                                            <li class="text-content">
+                                                                <span class="text-title">
+                                                                    Category:
+                                                                </span> @i["cat_name"]
+
+                                                            <li class="text-content">
+                                                                <span class="text-title">Quantity</span> @i["quantity"]
+                                                            </li>
+
+                                                            <li>
+                                                                <h5 class="text-content d-inline-block">Price :</h5>
+                                                                <span>@i["salerate"]</span>
+                                                                <span class="text-content">@i["mrp"]</span>
+                                                            </li>
+
+                                                            <li>
+                                                                <h5 class="saving theme-color">Saving : $20.68</h5>
+                                                            </li>
+
+                                                            <li class="quantity-price-box">
+                                                                <div class="cart_qty">
+                                                                    <div class="input-group">
+                                                                        <button type="button" class="btn qty-left-minus"
+                                                                                data-type="minus" data-field="">
+                                                                            <i class="fa fa-minus ms-0"
+                                                                               aria-hidden="true"></i>
+                                                                        </button>
+                                                                        <input class="form-control input-number qty-input"
+                                                                               type="text" name="quantity" value="@i["quantity"]">
+                                                                        <button type="button" class="btn qty-right-plus"
+                                                                                data-type="plus" data-field="">
+                                                                            <i class="fa fa-plus ms-0"
+                                                                               aria-hidden="true"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+
+                                                            <li>
+                                                                <h5>@i["Total"]</h5>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td class="price">
+                                                <h4 class="table-title text-content">Price</h4>
+                                                <h5>
+                                                    <span id="salerate_@i["product_id"]">
+                                                        @i["salerate"]
+                                                    </span>
+                                                    <del class="text-content">@i["mrp"]</del>
+                                                </h5>
+                                                <h6 class="theme-color">You Save : @(Convert.ToInt32(i["mrp"])- Convert.ToInt32(i["salerate"]))</h6>
+                                            </td>
+
+                                            <td class="quantity">
+                                                <h4 class="table-title text-content">Qty</h4>
+                                                <div class="quantity-price">
+                                                    <div class="cart_qty">
+                                                        <div class="input-group">
+                                                            <button type="button" class="btn qty-left-minus addtocart"
+                                                                    data-type="minus" data-field="" data-id="@i["product_id"]">
+                                                                <i class="fa fa-minus ms-0" aria-hidden="true"></i>
+                                                            </button>
+                                                            <input class="form-control input-number qty-input" type="text" id="quantity_@i["product_id"]"
+                                                                   name="quantity" value="@i["quantity"]" />
+                                                            <button type="button" class="btn qty-right-plus addtocart"
+                                                                    data-type="plus" data-field="" data-id="@i["product_id"]">
+                                                                <i class="fa fa-plus ms-0" aria-hidden="true"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td class="subtotal">
+                                                <h4 class="table-title text-content">Total</h4>
+
+                                                <h5 class="total_of_items" id="total_@i["product_id"]">@i["Total"]</h5>
+                                            </td>
+
+                                            <td class="save-remove">
+
+                                                <a class="save notifi-wishlist" href="javascript:void(0)"><i class="fa fa-trash text-danger"></i></a>
+
+                                            </td>
+                                        </tr>
+
+
+                                        { sum += Convert.ToInt32(i["total"]); }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xxl-3">
+                <div class="summery-box p-sticky">
+                    <div class="summery-header">
+                        <h3>Cart Total</h3>
+                    </div>
+
+                    <div class="summery-contain">
+                        <div class="coupon-cart">
+                            <h6 class="text-content mb-2">Bill Detail</h6>
+
+                        </div>
+                        <ul>
+                            <li>
+                                <h4>Subtotal</h4>
+                                <h4 id="total_of_product" class="price">@sum</h4>
+                            </li>
+
+                            <li>
+                                <h4>Delivery Charge</h4>
+                                <h4 class="price">50rs</h4>
+                            </li>
+
+
+                        </ul>
+                    </div>
+
+                    <ul class="summery-total">
+                        <li class="list-total border-top-0">
+                            <h4>Total (INR)</h4>
+                            <h4 id="total_of_bill" class="price theme-color">@(sum+50)</h4>
+                        </li>
+                    </ul>
+
+                    <div class="button-group cart-button">
+                        <ul>
+                            <li>
+                                <button onclick="location.href ='/home/success_order'"
+                                        class="btn btn-animation proceed-btn fw-bold">
+                                    Process To Checkout
+                                </button>
+                            </li>
+
+                            <li>
+                                <button onclick="location.href = '/home/product_category';"
+                                        class="btn btn-light shopping-button text-dark">
+                                    <i class="fa-solid fa-arrow-left-long"></i>Return To Shopping
+                                </button>
+                            </li>
+
+                        </ul><div style="text-align:left">
+                            <h4>Cancellation Policy</h4>
+                            <h6>   Orders cannot be cancelled once packed for delivery. In case of unexpected delays, a refund will be provided, if applicable.</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!--Modal-->
+<!-- Button trigger modal -->
+<!-- Modal -->
+<div class="modal fade " id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Update Address</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="modalform">
+                <div class="modal-body">
+
+                    <input type="hidden" class="form-control  mb-2" value="@ViewBag.user.Rows[0]["mobno"]" placeholder="Enter Your New Adress here" name="mobno" />
+                    Address:
+                    <input type="text" class="form-control  mb-2" value="@ViewBag.user.Rows[0]["address"]" placeholder="Enter Your New Adress here" name="address" />
+                    PinCode:
+                    <input type="text" class="form-control mb-2" value="@ViewBag.user.Rows[0]["pincode"]" placeholder="Enter Your New PinCode here" name="pincode" />
+                    Landmark:
+                    <input type="text" class="form-control mb-2" value="@ViewBag.user.Rows[0]["landmark"]" placeholder="Enter Your New Landmark here" name="landmark" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="updatemodal()">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

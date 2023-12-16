@@ -1,0 +1,99 @@
+﻿
+@{
+    ViewBag.Title = "registration";
+    Layout = "~/Views/Shared/_genral_pages.cshtml";
+}
+
+
+<script src="~/Content/js/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#btn").click(function () {
+           var error = 0;
+            var form_data = new FormData();
+            $.each($("#form").serializeArray(), function (index, element) {
+                form_data.append(element.name, element.value);
+                if (element.value == null || element.value == "") {
+                    error = 1;
+                    return;
+                }
+            });
+            form_data.append("user_pic", $("#user_pic").get(0).files[0]);
+            if (error == 1) {
+                alert("Plz Fill All property");
+                return;
+
+            }
+            $.ajax({
+                url: "/home/add_registration",
+                type: "post",
+                data: form_data,
+                dataType: "json",
+                processData: false,
+                contentType: false,
+                success: (function (res) {
+                    alert(res);
+                    document.getElementById("form").reset();
+                    window.location.href = "/home/login";
+
+                }),
+                error: (function (res) {
+                    alert("password matched successfully");
+                    document.getElementById("form").reset();
+                })
+            })
+
+
+        });
+    })
+</script>
+
+<div class="row">
+    <div class="col-sm-10 mx-auto">
+        <div class="row">
+            <div class="col-sm-6 p-5 ">
+                <div class="image-contain">
+                    <img src="../content/images/inner-page/sign-up.png" class="img-fluid" alt="">
+                </div>
+            </div>
+            <div class="col-sm-6 mx-auto  p-5">
+                <form class="form-control p-5 mb-2 " id="form">
+                    <h2 class="text-center text-theme mb-2">Registration</h2>
+                    Name:
+                    <input type="text" class="form-control mb-2" placeholder="Enter Your Name" name="name" id="name" />
+                    Email:
+                    <input type="email" class="form-control mb-2" placeholder="Enter Your Email" name="email" id="email" />
+                    Mobile Number:
+                    <input type="text" class="form-control mb-2" placeholder="Enter Mobile number" name="mobno" id="mobno" />
+                    Password
+                    <input type="password" class="form-control mb-2" placeholder="Enter Your Password" name="pass" id="pass" />
+                    Conferm Password
+                    <input type="password" class="form-control mb-2" placeholder="Enter Your Conferm Password" name="pass1" id="pass1" />
+                    Address:
+                    <textarea class="form-control mb-2" style="resize:none;" name="address" id="address" placeholder="Enter Your Address"></textarea>
+                    Pincode:
+                    <input type="text" class="form-control mb-2" placeholder="Enter Your Pincode" name="pincode" id="pincode" />
+                    LandMark:
+                    <input type="text" class="form-control mb-2" placeholder="Enter Landmark" name="landmark" id="landmark" />
+                    Upload Profile Photo:
+                    <input type="file" class="form-control mb-2" placeholder="Select Picture" name="user_pic" id="user_pic" />
+
+
+
+                    <input type="button" class="btn btn-warning  mt-3 w-75 mx-auto" value="Create Account" id="btn" />
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+   
+
+</div>
+
+
+
+
+

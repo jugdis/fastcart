@@ -1,0 +1,229 @@
+﻿@model System.Data.DataTable
+@using System.Data
+@{
+    ViewBag.Title = "product_category";
+    Layout = "~/Views/Shared/_genral_pages.cshtml";
+}
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script>
+    function ProductDescription(id) {
+        var src = $("#pimg_" + id).attr("src");
+        $("#pimg").removeAttr("src");
+        $("#pimg").attr("src", src);
+        var a = $("#pname_" + id).text()
+        $("#ptitle").text(a);
+        var b = $("#pdetail_" + id).html()
+        $("#pdetail").html(b);
+        var c = $("#psalerate_" + id).text()
+        $("#salerate").text(c);
+        var d = $("#pmrp_" + id).text()
+        $("#mrp").text(d)
+        $('#view').modal('show');
+
+    }
+
+    $(document).ready(function () {
+        $(".addtocart").click(function () {
+
+            var product_id = $(this).attr("data_id");
+            $("#cart_qty_" + product_id).css("display", "block");
+            var quantity = $("#quantity_" + product_id).val()
+            if (quantity == 0) {
+                $("#cart_qty_" + product_id).css("display", "none");
+                $("#quantity_" + product_id).val("1")
+            }
+            $.ajax({
+                url: '/home/AddToCart',
+                type: 'POST',
+                data: { "product_id": product_id, "quantity": quantity },
+                dataType: 'json',
+                success: function (res) {
+                    if (res == false)
+                        window.location.href = "/home/login";
+                        //update the cart item
+                    var l = '<i class="fa-solid fa-cart-shopping h3 text-danger me-2"></i>';
+                    $("#cart_count").html(l+res)
+                },
+                error: function () {
+                    alert('error occured');
+                }
+            })
+        })
+    })
+</script>
+<!-- Product Section Start -->
+<section class="product-section">
+    <div class="container-fluid-lg">
+        <div class="row g-sm-4 g-3">
+            <div class="col-xxl-3 col-xl-4 d-none d-xl-block">
+                <div class="p-sticky">
+
+
+                </div>
+            </div>
+
+            <div class="title">
+                <h2>Browse by Categories</h2>
+                <span class="title-leaf">
+                    <svg class="icon-width">
+                        <use xlink:href="https://themes.pixelstrap.com/fastkart/assets/svg/leaf.svg#leaf"></use>
+                    </svg>
+                </span>
+                <p>Top Categories Of The Week</p>
+            </div>
+
+            <div class="category-slider-2 product-wrapper no-arrow">
+                @if (Model != null)
+                {
+                    foreach (System.Data.DataRow row in Model.Rows)
+                    {
+                        <div>
+                            <a href="/home/index/@row["cat_id"]" class="category-box category-dark">
+                                <div>
+                                    <img src="~/Content/categoryicon/@row["cat_icon"]" class="blur-up lazyload" alt="">
+                                    <h5>@row["cat_name"]</h5>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                }
+
+
+
+            </div>
+
+            <!-- Product section starts from here -->
+
+            <div class="col-xxl-12 col-lg-12">
+                <div class="title d-block">
+                    <h2 class="text-theme font-sm">TOP SAVE TODAY</h2>
+                    <p>A virtual assistant collects the products from your list</p>
+                </div>
+                <div class="row row-cols-xxl-5 row-cols-xl-4 row-cols-md-3 row-cols-2 g-sm-4 g-3 no-arrow
+                        section-b-space">
+
+                    @if (ViewBag.products != null)
+                    {
+                        foreach (DataRow i in ViewBag.products.Rows)
+                        {
+
+                            <div>
+                                <div class="product-box product-white-bg wow fadeIn">
+                                    <div id="pdetail_@i["product_id"]" style="display:none">
+
+                                        @Html.Raw(i["dec"])
+                                    </div>
+                                    <div class="product-image">
+                                        <a href="product-left-thumbnail.html">
+                                            <img src="~/Content/categoryicon/@i["product_icon"]"
+                                                 id="pimg_@i["product_id"]" class="img-fluid blur-up lazyload" alt="">
+                                        </a>
+                                        <ul class="product-option">
+                                            <li data-bs-toggle="tooltip" data-bs-placement="top" title="View">
+                                                @*<a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#view">*@
+                                                <a class="" style="margin-left:60px;" onclick="ProductDescription(@i["product_id"])">
+                                                    <i data-feather="eye"></i>
+                                                </a>
+                                            </li>
+
+                                        </ul>
+                                    </div>
+                                    <div class="product-detail position-relative">
+                                        <a href="product-left-thumbnail.html">
+                                            <h6 class="name " id="pname_@i["product_id"]">
+                                                @i["product_name"]
+                                            </h6>
+                                        </a>
+
+                                        <h6 class="sold weight text-content fw-normal"></h6>
+                                        <h5 class="sold text-content">
+                                            <span class="theme-color price" id="psalerate_@i["product_id"]"> Rs: @i["salerate"]</span>
+                                            <del id="pmrp_@i["product_id"]"> Mrp: @i["mrp"]</del><br />
+                                            <span class="text-warning">Discount @i["per_discount"] %</span>
+                                        </h5>
+                                        <br />
+                                        @{
+                                            string plus = "block", plusminus = "none", quantity = "1";
+                                            if (i["quantity"].ToString() != null && i["quantity"].ToString() != "")
+                                            {
+                                                plus = "none";
+                                                plusminus = "block";
+                                                quantity = i["quantity"].ToString();
+                                            }
+                                        }
+                                        <div class="add-to-cart-btn-2 addtocart_btn">
+                                            <button class="btn addcart-button btn buy-button addtocart me-3" data_id="@i["product_id"]">
+                                                <i class="fa-solid fa-plus"></i>
+                                            </button>
+                                            <div class="cart_qty qty-box-2 ms-0 " style="display:@plusminus ; height:40px; width:100%;" id="cart_qty_@i["product_id"]">
+                                                <div class="input-group">
+                                                    <button type="button" class="qty-left-minus addtocart" data-type="minus"
+                                                            data_id="@i["product_id"]" data-field="">
+                                                        <i class="fa fa-minus" aria-hidden="true"></i>
+                                                    </button>
+                                                    <input class="form-control input-number qty-input" type="text" id="quantity_@i["product_id"]"
+                                                           name="quantity" value="@quantity">
+                                                    <button type="button" class="qty-right-plus addtocart" data-type="plus"
+                                                            data_id="@i["product_id"]" data-field="">
+                                                        <i class="fa fa-plus" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        }
+                    }
+                </div>
+
+            </div>
+
+            <!-- product section end -->
+
+        </div>
+    </div>
+</section>
+
+<!-- Quick View Modal Box Start -->
+<div class="modal fade theme-modal view-modal" id="view" tabindex="-1" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <div class="modal-header p-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-sm-4 g-2">
+                    <div class="col-lg-6">
+                        <div class="slider-image mx-auto">
+                            <img id="pimg" class=" blur-up lazyload" height="350" style="margin-left:50px; margin-top:100px"
+                                 alt="">
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="right-sidebar-modal">
+                            <h4 class="title-name" id="ptitle"></h4>
+                            <h4 class="price theme-color" id="salerate">$36.99</h4>
+                            <del id="mrp" class="text-danger"></del>
+
+
+                            <div class="product-detail">
+                                <h4>Product Details :</h4>
+                                <p id="pdetail"></p>
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,198 @@
+﻿
+@{
+    ViewBag.Title = "product";
+    Layout = "~/Views/Shared/_layout_Admin.cshtml";
+}
+<script src="~/Content/js/jquery-3.6.0.min.js"></script>
+<script src="~/Content/ckeditor/ckeditor/ckeditor.js"></script>
+<script>
+    $(document).ready(function () {
+        print_table();
+
+        $("#btn").click(function () {
+            // alert("ok");
+            var a = CKEDITOR.instances.dec.getData();
+            if (a == null || a == "") {
+                alert("plz fill the dec of product");
+                return;
+            }
+            var error = 0;
+            var form_data = new FormData();
+            $.each($("#form").serializeArray(), function (index, element) {
+                form_data.append(element.name, element.value);
+                if ((element.value == null || element.value == "") && (element.name != "dec") && (element.name != "product_id") ) {
+                    error = 1;
+                    return;
+                }
+                form_data.append("dec", a);
+            });
+            form_data.append("product_icon", $("#pic").get(0).files[0]);
+            if (error == 1) {
+                alert("Plz Fill All property");
+                return;
+               
+            }
+           
+            $.ajax({
+                url: '/admin/add_product',
+                type: 'post',
+                data: form_data,
+                datatype: 'json',
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    alert(res);
+                    document.getElementById("form").reset();
+                    print_table();
+                    
+
+                },
+                Error: function () {
+                    alert("Error !!!")
+
+                }
+            })
+        })
+
+
+
+
+
+        //bind subcategory
+        $("#cat_id").change(function () {
+            var c = $("#cat_id").val();
+            if (c != 0) {
+                $.ajax({
+                    url: '/admin/bind_subcat',
+                    type: 'post',
+                    dataType: 'json',
+                    data: { 'cat_id': c },
+                    success: function (res) {
+                        var option = "<option  value='0'>Select Sub Category</option>"
+                        $.each(res, function (index, element) {
+                            option += "<option value='" + element.subcat_id + "'>" + element.subcat_name + "</option>"
+                            //option += ==> option = option +
+                        })
+                        $("#subcat_id").html(option)
+
+                    }
+                })
+
+            }
+        })
+
+    })
+       
+    function print_table() {
+        $.ajax({
+            url: '/admin/print_table_product',
+            type: 'get',
+            success: function (res) {
+                $("#tbl tbody").empty();
+                $.each(res, function (index, element) {
+                    $("#tbl tbody").append("<tr><td>" + element.product_name + "</td><td>" + element.cat_name + "</td><td>" + element.subcat_name + "</td><td>" + element.mrp + "</td><td>" + element.salerate + "</td><td>" + element.dec + "</td><td>" + element.brand + "</td><td class='product-image'><img src='/Content/categoryicon/" + element.product_pic + "' class='img-flui' height='100px'></td><td><span class='btn btn-danger' onclick='delrecord(" + element.product_id + ")'>Delete</span>&nbsp<span class='btn btn-info' onclick='getdata(" + element.product_id + ")'>update</span></td></tr>")
+                })
+
+
+            }
+        })
+    }
+
+    function delrecord(product_id) {
+        $.ajax({
+            url: '/admin/del_product',
+            type: 'post',
+            data: { 'product_id': product_id },
+            dataType: 'json',
+            success: function (res) {
+                alert(res);
+                print_table();
+
+            }
+        })
+    }
+
+    function getdata(product_id) {
+        $.ajax({
+            url: '/admin/get_product',
+            type: 'post',
+            data: { 'product_id': product_id },
+            dataType: 'json',
+            success: function (res) {
+                $("#product_id").val(res.product_id)
+                $("#product_name").val(res.product_name)
+
+                $("#dec").val(res.dec)
+                $("#dec").val(res.dec)
+                $("#mrp").val(res.mrp)
+                $("#salerate").val(res.salerate)
+                $("#brand").val(res.brand)
+                $("#btn").val("Update");
+
+
+            }
+        })
+    }
+</script>
+<div class="col-sm-6 mb-5 mx-auto p-3">
+    <h2 class="text-center">Product</h2>
+    <form id="form">
+       <input type="hidden" readonly id="product_id" class="form-control" placeholder="Product Id" name="product_id" />
+
+        Product Title:
+        <input type="text" placeholder="Product title" id="product_name" name="product_name" class="form-control mb-2" />
+        Category:
+        <select class="form-select mb-2" id="cat_id" name="cat_id">
+            <option>---select category----</option>
+            @if (ViewBag.data.Rows.Count > 0)
+            {
+                foreach (var i in ViewBag.data.Rows)
+                {
+                    <option value="@i["cat_id"]">@i["cat_name"]</option>
+                }
+            }
+        </select>
+        SubCategory:
+        <select class="form-select mb-2" id="subcat_id" name="subcat_id">
+        </select>
+        Decprition:
+        @*<textarea name="dec" id="dec1" class="form-control" style=" resize: none;"></textarea>*@
+        <textarea name="dec" id="dec" class="form-control" style=" resize: none;"></textarea>
+        <script type="text/javascript">
+            CKEDITOR.replace('dec');
+        </script>
+        Product MRP:
+        <input type="text" placeholder="Product MRP" id="mrp" name="mrp" class="form-control mb-2" />
+        Product saleraate:
+        <input type="text" placeholder="Product salerate" id="salerate" name="salerate" class="form-control mb-2" />
+        Brand:
+        <input type="text" placeholder="Product Brand" id="brand" name="brand" class="form-control mb-2" />
+        Product Image:
+        <input type="file" id="pic" class="form-select form-control mb-3" name="pic" />
+        <input type="button" id="btn" value="Add Product " class="btn btn-success btn btn-2-animation" />
+
+
+
+    </form>
+</div>
+
+<div>
+    <table class="table product-table" id="tbl">
+        <thead>
+            <tr>
+                <th scope="col">Product Name</th>
+                <th scope="col">Product category</th>
+                <th scope="col">Product SubCategory </th>
+                <th scope="col">Product MRP</th>
+                <th scope="col">Product Salerate</th>
+                <th scope="col">Product Decription</th>
+                <th scope="col">Product  Brand</th>
+                <th scope="col">Product Image</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+

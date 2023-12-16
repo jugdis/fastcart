@@ -1,0 +1,121 @@
+﻿
+@{
+    ViewBag.Title = "category";
+    Layout = "~/Views/Shared/_layout_Admin.cshtml";
+}
+
+<script src="~/Content/js/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        print_table();
+        $("#btn").click(function () {
+            $("#btn").val("Add category");
+            var data = new FormData();
+            data.append("cat_name", $("#cat_name").val());
+            data.append("cat_id", $("#cat_id").val());
+            data.append("cat_icon", $("#cat_icon").get(0).files[0]);
+            //var cat_name = $("#cat_name").val();
+            //var img = $("#cat_icon").get(0).files[0];
+
+            $.ajax({
+                url: '/admin/add_category',
+                type: 'post',
+                data: data,
+                datatype: 'json',
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    print_table();
+                    document.getElementById("form").reset();
+
+
+                }
+
+            })
+        })
+    })
+
+
+    function print_table() {
+        $.ajax({
+            url: '/admin/print_table_category',
+            type: 'get',
+            success: function (res) {
+                $("#tbl tbody").empty();
+                $.each(res, function (index, element) {
+                    $("#tbl tbody").append("<tr><td>" + (index + 1) + "</td><td>" + element.cat_name + "</td><td class='product-image'><img src='/Content/categoryicon/" + element.cat_pic + "' class='img-flui' height='100px'></td><td>" + element.cat_status + "</td><td><span class='btn btn-danger' onclick='delrecord(" + element.cat_id + ")'>Delete</span>&nbsp<span class='btn btn-info' onclick='getdata(" + element.cat_id + ")'>update</span></td></tr>")
+
+                })
+
+
+            }
+        })
+    }
+
+
+    function delrecord(cat_id) {
+        $.ajax({
+            url: '/admin/del_category',
+            type: 'post',
+            data: { 'cat_id': cat_id },
+            dataType: 'json',
+            success: function (res) {
+                alert(res);
+                print_table();
+
+            }
+        })
+    }
+
+
+    function getdata(cat_id) {
+        
+        $.ajax({
+            url: '/admin/get_category',
+            type: 'post',
+            data: { 'cat_id': cat_id },
+            dataType: 'json',
+            success: function (res) {
+                $("#cat_name").val(res.cat_name)
+                $("#cat_id").val(res.cat_id)
+                $("#btn").val("Update");
+
+                
+
+            }
+        })
+    }
+</script>
+
+<div class="col-sm-6 mb-5 mx-auto p-5">
+    <h2 class="text-center mb-2">Add Category</h2>
+    <form id="form">
+        <input type="text" readonly id="cat_id"  class="form-control" placeholder="category Id" name="cat_id" />
+        Category name :
+        <input type="text" id="cat_name" class="form-control" placeholder="Enter Category of product" name="cat_name" />
+        Category icon:
+        <input type="file" id="cat_icon" class="form-select form-control mb-3" name="cat_icon" />
+        <input type="button" id="btn" value="Add Categorys " class="btn btn-success btn btn-2-animation" />
+    </form>
+
+</div>
+@*<td class="product-image">*@
+    <div class="col-sm-12">
+        <table class="table product-table" id="tbl">
+            <thead>
+                <tr>
+                    <th scope="col">Sr</th>
+                    <th scope="col">Product category</th>
+                    <th scope="col">Category pic</th>
+                    <th scope="col">Category Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+               
+
+
+            </tbody>
+        </table>
+    </div>
+

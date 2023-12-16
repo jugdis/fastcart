@@ -1,0 +1,134 @@
+﻿
+@{
+    ViewBag.Title = "sub_category";
+    Layout = "~/Views/Shared/_layout_Admin.cshtml";
+}
+
+<script src="~/Content/js/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#tbl").DataTable();
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        print_table();
+        $("#btn").click(function () {
+            $("#btn").val("Add Subcategory");
+
+            var data = new FormData();
+            data.append("cat_name", $("#cat_name").val());
+            data.append("subcat_name", $("#subcat_name").val());
+            data.append("subcat_id", $("#subcat_id").val());
+            data.append("subcat_icon", $("#subcat_icon").get(0).files[0])
+
+
+
+            $.ajax({
+                url: '/admin/add_subcat',
+                data: data,
+                dataType: 'json',
+                type: 'post',
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    alert(res);
+                    print_table();
+                    document.getElementById("form").reset();
+                    $("#tbl").DataTable();
+                }
+            })
+        })
+    })
+
+    function print_table() {
+        $.ajax({
+            url: '/admin/print_table_subcategory',
+            type: 'get',
+            success: function (res) {
+                $("#tbl tbody").empty();
+                $.each(res, function (index, element) {
+                    $("#tbl tbody").append("<tr><td>" + (index + 1) + "</td><td>" + element.cat_name + "</td><td>" + element.subcat_name + "</td><td class='product-image'><img src='/Content/categoryicon/" + element.subcat_pic + "' class='img-flui' height='100px'></td><td>" + element.subcat_status + "</td><td><span class='btn btn-danger' onclick='delrecord(" + element.subcat_id + ")'>Delete</span>&nbsp<span class='btn btn-info' onclick='getdata(" + element.subcat_id + ")'>update</span></td></tr>")
+                })
+                $("#tbl").DataTable();
+
+            }
+        })
+    }
+
+    function delrecord(subcat_id) {
+        $.ajax({
+            url: '/admin/del_subcategory',
+            type: 'post',
+            data: { 'subcat_id': subcat_id },
+            dataType: 'json',
+            success: function (res) {
+                alert(res);
+                print_table();
+
+            }
+        })
+    }
+
+
+    function getdata(subcat_id) {
+        $.ajax({
+            url: '/admin/get_subcategory',
+            type: 'post',
+            data: { 'subcat_id': subcat_id },
+            dataType: 'json',
+            success: function (res) {
+                $("#subcat_name").val(res.subcat_name)
+                $("#subcat_id").val(res.subcat_id)
+                
+               // $("#cat_name").val(res.cat_name)
+                $("#btn").val("Update");
+
+
+            }
+        })
+    }
+</script>
+<div class="col-sm-6 mx-auto mb-4 p-3">
+    <h2 class="text-center mb-2">Sub category</h2>
+    <form id="form">
+        <input type="text" readonly id="subcat_id" class="form-control" placeholder="Subcategory Id" name="subcat_id" />
+
+        Chose Category:
+        <select name="cat_name" id="cat_name" class="form-select mb-2">
+            <option>--Chose Category</option>
+            @if (ViewBag.data.Rows.Count > 0)
+            {
+                foreach (var i in ViewBag.data.Rows)
+                {
+                    <option value="@i["cat_id"]">@i["cat_name"]</option>
+                }
+            }
+        </select>
+        Sub Category Name:
+        <input type="text" class="form-control mb-2" placeholder="Enter Sub category" name="subcat_name" id="subcat_name" />
+        Sub category icon :
+        <input type="file" id="subcat_icon" name="subcat_icon" class="form-control mb-2" />
+        <input type="button" class="btn   btn-2-animation btn-warning" id="btn" value=" Add Sub Category" />
+
+    </form>
+
+</div>
+
+<div class="col-sm-10 mx-auto">
+    <table class="table product-table" id="tbl">
+        <thead>
+            <tr>
+                <th scope="col">Sr</th>
+                <th scope="col" >Product Category</th>
+                <th scope="col">Product Subcategory</th>
+                <th scope="col">Category pic</th>
+                <th scope="col">Category Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+

@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewBag.Title = "login";
+    Layout = "~/Views/Shared/_genral_pages.cshtml";
+}
+
+<div class="row">
+    <div class="col-sm-10 mx-auto mt-4">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="image-contain">
+                    <img src="../content/images/inner-page/log-in.png" class="img-fluid" alt="">
+                </div>
+            </div>
+            <div class="col-sm-6 mx-auto mb-2 p-5">
+                
+                @if (ViewBag.error != null)
+                {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>Error !</strong> Mobile Number or Password is incorrect.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                }
+                <form class="form-control p-5 mb-2 " method="post" id="form">
+                    <h2 class="text-center text-theme mb-2">login</h2>
+                    <input type="text" class="form-control mb-2" placeholder="Enter Mobile number" name="mobno" id="mobno" />
+                    <input type="password" class="form-control mb-2" placeholder="Enter Your Password" name="pass" id="pass" />
+                    <a href="#" class="link-danger "> Forget Password </a>
+                    <a href="/home/registration" class="link-primary float-end">Create Account</a>
+                    <input type="submit" class="btn btn-danger btn-2-animation mt-3 w-75 ms-5" value="Login" id="btn" />
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
